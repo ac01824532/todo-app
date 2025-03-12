@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>簡易待辦事項清單</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 500px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+        }
+        .todo-container {
+            margin-top: 20px;
+        }
+        .todo-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px;
+            border-bottom: 1px solid #eee;
+            align-items: center;
+        }
+        .todo-item.completed {
+            text-decoration: line-through;
+            opacity: 0.7;
+        }
+        input[type="text"] {
+            padding: 10px;
+            width: 70%;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        button {
+            padding: 10px 15px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        .delete-btn {
+            background-color: #f44336;
+            padding: 5px 10px;
+        }
+        .delete-btn:hover {
+            background-color: #d32f2f;
+        }
+    </style>
+</head>
+<body>
+    <h1>我的待辦事項清單</h1>
+    
+    <div>
+        <input type="text" id="taskInput" placeholder="新增待辦事項...">
+        <button onclick="addTask()">新增</button>
+    </div>
+    
+    <div class="todo-container" id="todoList">
+        <!-- 待辦事項將在這裡動態生成 -->
+    </div>
+
+    <script>
+        // 從 localStorage 加載待辦事項
+        let tasks = JSON.parse(localStorage.getItem('tasks')) || [];
+        
+        // 初始化頁面
+        document.addEventListener('DOMContentLoaded', function() {
+            renderTasks();
+        });
+        
+        // 渲染所有待辦事項
+        function renderTasks() {
+            const todoList = document.getElementById('todoList');
+            todoList.innerHTML = '';
+            
+            tasks.forEach((task, index) => {
+                const taskElement = document.createElement('div');
+                taskElement.className = `todo-item ${task.completed ? 'completed' : ''}`;
+                
+                const taskText = document.createElement('span');
+                taskText.textContent = task.text;
+                taskText.onclick = function() { toggleTask(index); };
+                
+                const deleteButton = document.createElement('button');
+                deleteButton.textContent = '刪除';
+                deleteButton.className = 'delete-btn';
+                deleteButton.onclick = function() { deleteTask(index); };
+                
+                taskElement.appendChild(taskText);
+                taskElement.appendChild(deleteButton);
+                todoList.appendChild(taskElement);
+            });
+        }
+        
+        // 新增待辦事項
+        function addTask() {
+            const taskInput = document.getElementById('taskInput');
+            const text = taskInput.value.trim();
+            
+            if (text) {
+                tasks.push({ text, completed: false });
+                saveTasks();
+                renderTasks();
+                taskInput.value = '';
+            }
+        }
+        
+        // 切換待辦事項完成狀態
+        function toggleTask(index) {
+            tasks[index].completed = !tasks[index].completed;
+            saveTasks();
+            renderTasks();
+        }
+        
+        // 刪除待辦事項
+        function deleteTask(index) {
+            tasks.splice(index, 1);
+            saveTasks();
+            renderTasks();
+        }
+        
+        // 儲存到 localStorage
+        function saveTasks() {
+            localStorage.setItem('tasks', JSON.stringify(tasks));
+        }
+        
+        // 按下 Enter 鍵也可以新增待辦事項
+        document.getElementById('taskInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                addTask();
+            }
+        });
+    </script>
+</body>
+</html>
